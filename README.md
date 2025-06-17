@@ -1,55 +1,48 @@
 **still-Membarr**
 =================
-is still a Membarr bot but with a small modifications i wanted & it looks like Yurorio didnt work on it anymore 
-so i decided to fork the bot but <br>**<ins>the thanks definitely go to Yuroio and faizyy01</ins>**
+is still a Membarr bot with small modifications it looks like Yurorio stopped work on it so i forked it<br>**<ins>the thanks definitely go to Yuroio and faizyy01</ins>**
 
-My motivation to change the bot: 
-1. on the other hand I simply missed the "membership function" and the independent password reset without admin.
-2. the annoying feature that people always have to create a new account after deactivation and thus of course the "seen tag" as well as the interests of the account owner, i.e. no suggestions that I might like
+My motivation to change the bot: <br>
+· on the other hand I simply missed the "membership function" and the independent password reset without admin.<br>
+· the annoying feature that people always have to create a new account after deactivation and thus of course the "seen tag" as well as the interests of the account owner, i.e. no suggestions that I might like<br>
 
-I personaly use: <br>
-**[baervers23/discord_subscription_bot](https://github.com/baervers23/discord_subscription_bot)** my subscription bot is the brain <br>
-**[baervers23/still-membarr](https://github.com/baervers23/still-Membarr)** still-membarr is like a gateceeper <br>
+<ins>My personaly use:</ins> <br>
+[discord_subscription_bot](https://github.com/baervers23/discord_subscription_bot) like the brain <br>
+[still-membarr](https://github.com/baervers23/still-Membarr) like a gateceeper <br>
 
 i share the costs of the server with friends and on this way its definitly fair to all <br>
-Also on this way there arent 2 accounts, so it dont get complicated with resetted password <br>
 
 >  [!TIP]
 >  When using Jellyfin & Jellyseer together, I recommend the following setting in Jellyseerr: <br>
 >  deactivate Jellyseerr -> User -> Activate local login <br>
->  activate  Jellyseer -> User -> Activate Jellyfin Login
+>  activate  Jellyseer -> User -> Activate Jellyfin Login <br>
 >
 >  Also on this way there arent 2 accounts, so it dont get complicated with resetted password <br>
 <br>
-** Modifications & Changes**<br>
-Functional: <br>
+
+Modifications & Changes:<br>
+
+<ins>Functional:</ins> <br>
   · When a user gets the role for the first time the bot create a jellyfin account like the original<br>
   · If the role get taken away the account will get disabled instead of deleted (keeps userdata like for example watched states)<br>
   · On reearning the role the user will become enabled again (no informations are gone so he still has the old password and permissions)<br>
-    delete account on loose role has been deactivated but its untouched (i just renamed the call function from delete to disable)<br>
+  · delete account on loose role has been deactivated but its untouched (i just renamed the call function from delete to disable)<br>
 <br>
-Commands:<br>
-· added user command **/jellyfin resetpassword** (You will get a DM with a new randomly generated password if you forgot your old one)
+<ins>Commands:</ins><br>
+· added user command **/jellyfin resetpassword** (You will get a DM with a new randomly generated password if you forgot your old one)<br>
 <br>
-Text/Language:<br>
-For my personal use i translated the text of the bot account creatiion/deactivation/reactivation part, i plan to retranslate it back for non german users 
+<ins>Text/Language:</ins><br>
+For my personal use i translated the text of the bot account creatiion/deactivation/reactivation part, i plan to retranslate it back for non german users <br>
 <br>
-Planned:<br>
-- [ ] Translate all the text back in english :tada:
+<ins>Planned:</ins><br>
+- [ ] Translate all the text back in english :tada:<br>
 
 <br>
 <br>
 <br>
-# ORIGINAL README BELOW
-==========================================================================================================================================================================
-
-[![Discord](https://img.shields.io/discord/997761163020488815?color=7289DA&label=Discord&style=for-the-badge&logo=discord)](https://discord.gg/7hAUKKTyTd)
-[![DockerHub](https://img.shields.io/badge/Docker-Hub-%23099cec?style=for-the-badge&logo=docker)](https://hub.docker.com/r/yoruio/membarr)
-![Docker Pulls](https://img.shields.io/docker/pulls/yoruio/membarr?color=099cec&style=for-the-badge)
-[![docker-sync](https://github.com/Yoruio/Membarr/actions/workflows/docker-sync.yml/badge.svg)](https://github.com/Yoruio/Membarr/actions/workflows/docker-sync.yml)
-
-Membarr 
-=================
+# ORIGINAL README BELOW<br>
+Membarr <br>
+=================<br>
 
 Membarr is a fork of Invitarr that invites discord users to Plex and Jellyfin. You can also automate this bot to invite discord users to a media server once a certain role is given to a user or the user can also be added manually.  
 
