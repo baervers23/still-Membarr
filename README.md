@@ -70,7 +70,12 @@ This command is used to list Membarr's database
 This command is used to add exsisting  plex emails, jellyfin users and discord id to the DB.
 /membarr dbrm <position>
 This command is used to remove a record from the Db. Use /membarr dbls to determine record position. ex: /membarr dbrm 1
-/jellyfin resetpassword             **<- NEW**
+```
+
+NEW Commands:
+
+```
+/jellyfin resetpassword 
 This command randomly generate a new password and send it to you in a dm
 ```
 # Creating Discord Bot
