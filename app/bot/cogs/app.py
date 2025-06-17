@@ -3,7 +3,8 @@ import app.bot.helper.jellyfinhelper as jelly
 from app.bot.helper.textformat import bcolors
 import discord
 from discord.ext import commands
-from discord import app_commands
+from discord.ui import View, button, Button
+from discord import app_commands, Interaction, ButtonStyle, Intents
 import asyncio
 from plexapi.myplex import MyPlexAccount
 from plexapi.server import PlexServer
@@ -128,7 +129,6 @@ if USE_PLEX and plex_configured:
 else:
     print(f"Plex {'disabled' if not USE_PLEX else 'not configured'}. Skipping Plex login.")
 
-
 class app(commands.Cog):
     # App command groups
     plex_commands = app_commands.Group(name="plex", description="Membarr Plex commands")
@@ -137,7 +137,7 @@ class app(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-    
+        
     @commands.Cog.listener()
     async def on_ready(self):
         print('------')
@@ -177,8 +177,9 @@ class app(commands.Cog):
     
     async def getusername(self, after):
         username = None
-        await embedinfo(after, f"Welcome To Jellyfin! Please reply with your username to be added to the Jellyfin server!")
-        await embedinfo(after, f"If you do not respond within 24 hours, the request will be cancelled, and the server admin will need to add you manually.")
+        await embedinfo(after, f"Willkommen auf meinem Jellyfin-Server! Gerne helfe ich dir, deinen Account zu erstellen.")
+        await embedinfo(after, f"Wie soll dein Benutzername lauten?")
+        await embedinfo(after, f"Info: Wenn du nicht innerhalb von 24 Stunden antwortest, wird der Vorgang abgebrochen und du musst den Admin bitten, dir manuell einen Account zu erstellen.")
         while (username is None):
             def check(m):
                 return m.author == after and not m.guild
@@ -188,16 +189,16 @@ class app(commands.Cog):
                     return str(username.content)
                 else:
                     username = None
-                    message = "This username is already choosen. Please select another username."
+                    message = "⚠️  Der Benutzername ist bereits vergeben!"
                     await embederror(after, message)
                     continue
             except asyncio.TimeoutError:
-                message = "Timed out. Please contact the server admin directly."
-                print("Jellyfin user prompt timed out")
+                message = "❌  Zeit abgelaufen, bitte kontaktiere den Admin"
+                print("Jellyfin Benutzernamen Eingabe abgelaufen")
                 await embederror(after, message)
                 return None
             except Exception as e:
-                await embederror(after, "Something went wrong. Please try again with another username.")
+                await embederror(after, "❌  Leider ist etwas schief gelaufen, probiere bitte einen anderen Benutzernamen!")
                 print (e)
                 username = None
 
@@ -228,25 +229,28 @@ class app(commands.Cog):
     
     async def addtojellyfin(self, username, password, response):
         if not jelly.verify_username(JELLYFIN_SERVER_URL, JELLYFIN_API_KEY, username):
-            await embederror(response, f'An account with username {username} already exists.')
+            await embederror(response, f'⚠️  Es existier bereits ein Account mit dem Benutzernamen: {username}.')
             return False
 
         if jelly.add_user(JELLYFIN_SERVER_URL, JELLYFIN_API_KEY, username, password, jellyfin_libs):
             return True
         else:
-            await embederror(response, 'There was an error adding this user to Jellyfin. Check logs for more info.')
+            await embederror(response, '❌  Fehler beim hinzufügen des Benutzers. Check logs for more info.')
             return False
+
+    async def resetpwjellyfin(self, username, password):
+        return jelly.reset_pw(JELLYFIN_SERVER_URL, JELLYFIN_API_KEY, username, password)
 
     async def removefromjellyfin(self, username, response):
         if jelly.verify_username(JELLYFIN_SERVER_URL, JELLYFIN_API_KEY, username):
-            await embederror(response, f'Could not find account with username {username}.')
+            await embederror(response, f'❌  Mir ist kein Account mit dem Benutzernamen: {username} bekannt.')
             return
         
         if jelly.remove_user(JELLYFIN_SERVER_URL, JELLYFIN_API_KEY, username):
-            await embedinfo(response, f'Successfully removed user {username} from Jellyfin.')
+            await embedinfo(response, f'✅  Der Benutzer {username} wurde von Jellifin entfernt.')
             return True
         else:
-            await embederror(response, f'There was an error removing this user from Jellyfin. Check logs for more info.')
+            await embederror(response, f'❌  Leider ist beim entfernen des Benutzers ein Fehler unterlaufen. Infos siehe logs.')
             return False
 
     @commands.Cog.listener()
@@ -255,6 +259,7 @@ class app(commands.Cog):
             return
         roles_in_guild = after.guild.roles
         role = None
+        #tmp = None
 
         plex_processed = False
         jellyfin_processed = False
@@ -309,59 +314,79 @@ class app(commands.Cog):
                     if role_in_guild.name == role_for_app:
                         role = role_in_guild
 
-                    # Jellyfin role was added
+                    # Role was added check first time or reactivation
                     if role is not None and (role in after.roles and role not in before.roles):
-                        print("Jellyfin role added")
-                        username = await self.getusername(after)
-                        print("Username retrieved from user")
-                        if username is not None:
-                            await embedinfo(after, "Got it we will be creating your Jellyfin account shortly!")
-                            password = jelly.generate_password(16)
-                            if jelly.add_user(JELLYFIN_SERVER_URL, JELLYFIN_API_KEY, username, password, jellyfin_libs):
-                                db.save_user_jellyfin(str(after.id), username)
-                                await asyncio.sleep(5)
-                                await embedcustom(after, "You have been added to Jellyfin!", {'Username': username, 'Password': f"||{password}||"})
-                                await embedinfo(after, f"Go to {JELLYFIN_EXTERNAL_URL} to log in!")
-                            else:
-                                await embedinfo(after, 'There was an error adding this user to Jellyfin. Message Server Admin.')
-                        jellyfin_processed = True
-                        break
-
-                    # Jellyfin role was removed
-                    elif role is not None and (role not in after.roles and role in before.roles):
-                        print("Jellyfin role removed")
+                        print("Jellyfin Role hinzugefügt")
                         try:
                             user_id = after.id
                             username = db.get_jellyfin_username(user_id)
-                            jelly.remove_user(JELLYFIN_SERVER_URL, JELLYFIN_API_KEY, username)
-                            deleted = db.remove_jellyfin(user_id)
-                            if deleted:
-                                print("Removed Jellyfin from {}".format(after.name))
-                                #await secure.send(plexname + ' ' + after.mention + ' was removed from plex')
-                            else:
-                                print("Cannot remove Jellyfin from this user")
-                            await embedinfo(after, "You have been removed from Jellyfin")
-                        except Exception as e:
-                            print(e)
-                            print("{} Cannot remove this user from Jellyfin.".format(username))
+                            if jelly.enable_user(JELLYFIN_SERVER_URL, JELLYFIN_API_KEY, username):
+                                await embedinfo(after, "✅Jellyfin wurde wieder aktiviert.")
+                                await embedinfo(after, f"Du kannst dich wieder bei {JELLYFIN_EXTERNAL_URL} einloggen!")
+                            elif jelly.enable_user(JELLYFIN_SERVER_URL, JELLYFIN_API_KEY, username) is False:
+                                await embedcustom(after, "❌  KILL TASK")
+                        except Exception as e:                                
+                            print("Erstanmeldung")
+                            username = await self.getusername(after)
+                            if username is not None:
+                                #await embedinfo(after, f"Alles klar, Benutzernamen: {username}, Passwort wird generiert.")
+                                password = jelly.generate_password(16)
+                                if jelly.add_user(JELLYFIN_SERVER_URL, JELLYFIN_API_KEY, username, password, jellyfin_libs):
+                                    db.save_user_jellyfin(str(after.id), username)
+                                    await asyncio.sleep(5)
+                                    await embedcustom(after, "✅  Benutzer wurde erfolgreich erstellt.", {'Username': username, 'Passwort': f"||{password}||"})
+                                    await embedinfo(after, f"Du kannst dich unter {JELLYFIN_EXTERNAL_URL} einloggen!")
+                                else:
+                                    await embedinfo(after, "❌  Error: Account konnte nicht erstellt werden. Server URL muss mit 'https://' angegeben werden.")
+                            jellyfin_processed = True
+                            break  
                         jellyfin_processed = True
                         break
+                        
+                    elif role is not None and (role not in after.roles and role in before.roles):
+                        print("Jellyfin Role entfernt.")
+                        try:
+                            user_id = after.id
+                            username = db.get_jellyfin_username(user_id)
+                            jelly.disable_user(JELLYFIN_SERVER_URL, JELLYFIN_API_KEY, username)
+                            await embedinfo(after, "❌  Dein Jellyfin Benutzer wurde deaktiviert")
+                        except Exception as e:
+                            print(e)
+                            print("❌  Fehler beim deaktivieren von Jellyfin: '{}'".format(username))
+                        jellyfin_processed = True
+                        break
+                    
                 if jellyfin_processed:
                     break
 
-    @commands.Cog.listener()
-    async def on_member_remove(self, member):
-        if USE_PLEX and plex_configured:
-            email = db.get_useremail(member.id)
-            plexhelper.plexremove(plex,email)
-        
-        if USE_JELLYFIN and jellyfin_configured:
-            jellyfin_username = db.get_jellyfin_username(member.id)
-            jelly.remove_user(JELLYFIN_SERVER_URL, JELLYFIN_API_KEY, jellyfin_username)
-            
-        deleted = db.delete_user(member.id)
-        if deleted:
-            print("Removed {} from db because user left discord server.".format(email))
+
+    @jellyfin_commands.command(name="resetpassword", description="Wenn du dein Passwort vergessen hast kannst du es hier resetten.")
+    async def resetpw(self, interaction: discord.Interaction): 
+        await interaction.response.defer(ephemeral=True)
+
+        password = jelly.generate_password(16)
+        username = db.get_jellyfin_username(interaction.user.id)
+    
+        if not username:
+            await embederror(interaction, "❌  Kein verknüpfter Jellyfin-Account gefunden.")
+            return
+
+        try:
+            success = await self.resetpwjellyfin(username, password)
+            if success:
+                try:
+                    message = (
+                        f"**Neues Passwort:** ||{password}||"
+                    )
+                    await interaction.user.send(message)
+                    await interaction.followup.send("✅   Dein neues Passwort wurde dir per DM geschickt.")
+                except discord.Forbidden:
+                    await interaction.followup.send("⚠️   Konnte dir keine DM senden. Aktiviere bitte private Nachrichten von Servermitgliedern.")
+            else:
+                await interaction.followup.send("❌   Passwort konnte nicht zurückgesetzt werden.")
+        except Exception as e:
+            print(e)
+            await interaction.followup.send("❌   Beim Passwort zurücksetzen ist ein Fehler aufgetreten.")
 
     @app_commands.checks.has_permissions(administrator=True)
     @plex_commands.command(name="invite", description="Invite a user to Plex")
@@ -378,7 +403,7 @@ class app(commands.Cog):
     async def jellyfininvite(self, interaction: discord.Interaction, username: str):
         password = jelly.generate_password(16)
         if await self.addtojellyfin(username, password, interaction.response):
-            await embedcustom(interaction.response, "Jellyfin user created!", {'Username': username, 'Password': f"||{password}||"})
+            await embedinfo(interaction.response, 'Jellyfin user created!', {'Username': username, 'Password': f'||{password}||'})
 
     @app_commands.checks.has_permissions(administrator=True)
     @jellyfin_commands.command(name="remove", description="Remove a user from Jellyfin")

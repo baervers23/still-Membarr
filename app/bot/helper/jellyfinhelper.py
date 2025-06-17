@@ -2,6 +2,8 @@ import requests
 import random
 import string
 
+import app.bot.helper.jellyfinhelper as jelly
+
 def add_user(jellyfin_url, jellyfin_api_key, username, password, jellyfin_libs):
     try:
         url = f"{jellyfin_url}/Users/New"
@@ -16,7 +18,7 @@ def add_user(jellyfin_url, jellyfin_api_key, username, password, jellyfin_libs):
         userId = response.json()["Id"]
 
         if response.status_code != 200:
-            print(f"Error creating new Jellyfin user: {response.text}")
+            print(f"Fehler beim erstellen des Jellyfin Benutzers: {response.text}")
             return False
         
         # Grant access to User
@@ -84,11 +86,12 @@ def add_user(jellyfin_url, jellyfin_api_key, username, password, jellyfin_libs):
         if response.status_code == 200 or response.status_code == 204:
             return True
         else:
-            print(f"Error setting user permissions: {response.text}")
+            print(f"❌  Fehler beim vergeben der Rechte an den Benutzer: {response.text}")
 
     except Exception as e:
         print(e)
         return False
+
 
 def get_libraries(jellyfin_url, jellyfin_api_key):
     url = f"{jellyfin_url}/Library/VirtualFolders"
@@ -119,7 +122,7 @@ def remove_user(jellyfin_url, jellyfin_api_key, jellyfin_username):
         
         if userId is None:
             # User not found
-            print(f"Error removing user {jellyfin_username} from Jellyfin: Could not find user.")
+            print(f"❌  Benutzer konnte nicht gelöscht werden, -mgs:{jellyfin_username}msg- von Jellyfin: Benutzer nicht gefunden.")
             return False
         
         # Delete User
@@ -131,11 +134,113 @@ def remove_user(jellyfin_url, jellyfin_api_key, jellyfin_username):
         if response.status_code == 204 or response.status_code == 200:
             return True
         else:
-            print(f"Error deleting Jellyfin user: {response.text}")
+            print(f"❌  Benutzer konnte nicht gelöscht werden: {response.text}")
     except Exception as e:
         print(e)
         return False
 
+def reset_pw(jellyfin_url, jellyfin_api_key, jellyfin_username, password):
+    try:
+        # Get User ID
+        users = get_users(jellyfin_url, jellyfin_api_key)
+        userId = None
+        for user in users:
+            if user['Name'].lower() == jellyfin_username.lower():
+                userId = user['Id']
+
+        if userId is None:
+            # User not found
+            print(f"❌  Passwort zurücksetzen fehlgeschlagen: {jellyfin_username} nicht gefunden.")
+            return False
+
+        url = f"{jellyfin_url}/Users/{userId}/Password"
+        querystring = {"api_key":jellyfin_api_key}
+        data = {
+            "CurrentPwd": "",
+            "NewPw": password
+        }
+        headers = {"Content-Type": "application/json"}
+
+        response = requests.request("POST", url, json=data, headers=headers, params=querystring)
+        if response.status_code == 204:
+            print("✅  Passwort zurückgesetzt")
+            return True
+        else:
+            print(f"❌  Fehler beim Passwort resetten: {response.text}")
+            return False
+
+    except Exception as e:
+        print(e)
+        return False
+ 
+def enable_user(jellyfin_url, jellyfin_api_key, jellyfin_username):
+    try:
+        # Get User ID
+        users = get_users(jellyfin_url, jellyfin_api_key)
+        userId = None
+        for user in users:
+            if user['Name'].lower() == jellyfin_username.lower():
+                userId = user['Id']
+        
+        if userId is None:
+            # User not found
+            print(f"⚠️   Kein Account mit dieser Discord ID verknüpft: {jellyfin_username}")
+            return False
+        
+        url = f"{jellyfin_url}/Users/{userId}/Policy"
+        querystring = {"api_key":jellyfin_api_key}
+        data = {
+        "IsDisabled": False,
+        "AuthenticationProviderId": "Jellyfin.Server.Implementations.Users.DefaultAuthenticationProvider",
+        "PasswordResetProviderId": "Jellyfin.Server.Implementations.Users.DefaultPasswordResetProvider"
+        }
+        headers = {"Content-Type": "application/json"}
+
+        response = requests.request("POST", url, json=data, headers=headers, params=querystring)
+        if response.status_code == 204:
+            print(f"✅  Benutzer wurde reaktiviert!")
+            return True
+        else:
+            print(f"❌  Fehler beim reaktivieren: {response.text}")
+            return False     
+    except Exception as e:
+        print(e)
+        return False
+
+def disable_user(jellyfin_url, jellyfin_api_key, jellyfin_username):
+    try:
+        # Get User ID
+        users = get_users(jellyfin_url, jellyfin_api_key)
+        userId = None
+        for user in users:
+            if user['Name'].lower() == jellyfin_username.lower():
+                userId = user['Id']
+        
+        if userId is None:
+            # User not found
+            print(f"❌  Fehler beim deaktivieren des Accounts {jellyfin_username}, User nicht gefunden.")
+            return False
+        
+        url = f"{jellyfin_url}/Users/{userId}/Policy"
+        querystring = {"api_key":jellyfin_api_key}
+        data = {
+        "IsDisabled": True,
+        "AuthenticationProviderId": "Jellyfin.Server.Implementations.Users.DefaultAuthenticationProvider",
+        "PasswordResetProviderId": "Jellyfin.Server.Implementations.Users.DefaultPasswordResetProvider"
+        }
+        headers = {"Content-Type": "application/json"}
+
+        response = requests.request("POST", url, json=data, headers=headers, params=querystring)
+        if response.status_code == 204:
+            print("✅  Benutzer wurde erfolgreich deaktiviert.")
+            return True
+        else:
+            print(f"❌  Fehler beim deaktivieren des Benutzers: {response.text}")
+            return False     
+    except Exception as e:
+        print(e)
+        return False
+       
 def get_users(jellyfin_url, jellyfin_api_key):
     url = f"{jellyfin_url}/Users"
 
@@ -147,7 +252,7 @@ def get_users(jellyfin_url, jellyfin_api_key):
 def generate_password(length, lower=True, upper=True, numbers=True, symbols=True):
     character_list = []
     if not (lower or upper or numbers or symbols):
-        raise ValueError("At least one character type must be provided")
+        raise ValueError("⚠️  Mindestens ein Zeichentyp muss angegeben werden")
         
     if lower:
         character_list += string.ascii_lowercase

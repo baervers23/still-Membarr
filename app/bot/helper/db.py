@@ -50,7 +50,7 @@ def save_user_email(username, email):
             VALUES('{username}', '{email}')
         """)
         conn.commit()
-        print("User added to db.")
+        print("Benutzer wurde der Datenbank erfolgreich hinzugefügt.")
     else:
         return "Username and email cannot be empty"
 
@@ -127,6 +127,32 @@ def get_jellyfin_username(username):
     else:
         return "username cannot be empty"
 
+def check_jellyfin_username(username):
+    """
+    Get jellyfin username of user based on discord username
+
+    param   username: discord username
+
+    return  jellyfin username
+    """
+    if username:
+        try:
+            cursor = conn.execute('SELECT discord_username, jellyfin_username from clients where discord_username="{}";'.format(username))
+            for row in cursor:
+                jellyfin_username = row[1]
+            if jellyfin_username:
+                print("true")
+                return True
+            else:
+                print("false")
+                return False
+        except:
+            print("error1")
+            return "error in fetching from db: check jellyfin"
+    else:
+        print("error2")
+        return "username cannot be empty: check jellyfin"
+        
 def remove_email(username):
     """
     Sets email of discord user to null in database

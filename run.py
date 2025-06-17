@@ -14,7 +14,8 @@ from app.bot.helper.message import *
 from requests import ConnectTimeout
 from plexapi.myplex import MyPlexAccount
 
-maxroles = 10
+
+maxroles = 99
 
 if switch == 0:
     print("Missing Config.")
@@ -342,5 +343,6 @@ async def disablejellyfin(interaction: discord.Interaction):
 
 bot.tree.add_command(plex_commands)
 bot.tree.add_command(jellyfin_commands)
+#bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 
 bot.run(Discord_bot_token)
