@@ -37,7 +37,9 @@ For my personal use i translated the text of the bot account creatiion/deactivat
 <ins>Planned:</ins><br>
 - [ ] Translate all the text back in english :tada:<br>
 <br>
-![conversation](/img/1.png)
+
+![conv](img/1.png)
+
 <br>
 <br>
 # ORIGINAL README BELOW<br>
