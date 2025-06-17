@@ -1,6 +1,6 @@
 **still-Membarr**
 =================
-is still a Membarr bot with small modifications it looks like Yurorio stopped work on it so i forked it<br>**<ins>the thanks definitely go to Yuroio and faizyy01</ins>**
+is still a Membarr bot with small modifications it looks like Yurorio stopped work on it so i forked it<br>**<ins>the thanks definitely go to [Yurorio](https://github.com/Yoruio/Membarr)  and [faizyy01](https://github.com/faizyy01/Invitarr)</ins>**
 
 My motivation to change the bot: <br>
 · on the other hand I simply missed the "membership function" and the independent password reset without admin.<br>
