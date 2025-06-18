@@ -20,7 +20,7 @@ i share the costs of the server with friends and on this way its definitly fair 
 >  Also on this way there arent 2 accounts, so it dont get complicated with resetted password <br>
 
 >  [!TIP]
->  change URL in Jellyseerr and you got forwarded to discord when click on "forgot password" [Example](/img/unbenannt.png)<br>
+>  change URL in Jellyseerr and you got forwarded to discord when click on "forgot password" [Example](/img/Unbenannt.png)<br>
 >  paste Discord Channel URL in Jellyseerr -> Settings -> Jellyfin -> forgot password URL  <br>
 
 Modifications & Changes:<br>
