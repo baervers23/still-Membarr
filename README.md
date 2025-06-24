@@ -85,7 +85,7 @@ This command is used to add exsisting  plex emails, jellyfin users and discord i
 This command is used to remove a record from the Db. Use /membarr dbls to determine record position. ex: /membarr dbrm 1
 ```
 
-NEW Commands:
+NEW Commands:<br>
 [See new commands above the original readme](#new-commands)
 
 # Creating Discord Bot
