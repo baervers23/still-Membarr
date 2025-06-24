@@ -142,8 +142,8 @@ class app(commands.Cog):
     async def on_ready(self):
         print('------')
         print("{:^41}".format(f"MEMBARR V {MEMBARR_VERSION}"))
-        print(f'Modified by Baervers23 htts://github.com/baervers23/\n')
-        print(f'Made by Yoruio https://github.com/Yoruio/\n')
+        print(f'Modified by Baervers23 https://github.com/baervers23/')
+        print(f'Forked from & Original by Yoruio https://github.com/Yoruio/\n')
         print(f'Forked from Invitarr https://github.com/Sleepingpirates/Invitarr')
         print(f'Named by lordfransie')
         print(f'Logged in as {self.bot.user} (ID: {self.bot.user.id})')
