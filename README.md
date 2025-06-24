@@ -26,15 +26,21 @@ i share the costs of the server with friends and on this way its definitly fair 
 Modifications & Changes:<br>
 
 <ins>Functional:</ins> <br>
-  · When a user gets the role for the first time the bot create a jellyfin account like the original<br>
-  · If the role get taken away the account will get disabled instead of deleted (keeps userdata like for example watched states)<br>
-  · On reearning the role the user will become enabled again (no informations are gone so he still has the old password and permissions)<br>
-  · delete account on loose role has been deactivated but its untouched (i just renamed the call function from delete to disable)<br>
+```
+  · When a user gets the role for the first time the bot create a jellyfin account like the original
+  · If the role get taken away the account will get disabled instead of deleted (keeps userdata like for example watched states)
+  · On reearning the role the user will become enabled again (no informations are gone so he still has the old password and permissions)
+  · delete account on loose role has been deactivated but its untouched (i just renamed the call function from delete to disable)
+```
 <br>
-<ins>Commands:</ins><br>
-· added user command **/jellyfin resetpassword** (You will get a DM with a new randomly generated password if you forgot your old one)<br>
-· added user command **/jellyfin refreshlibrary** (Initialize a manual full library scan in case of sonarr/radarr failed or whatever)<br>
-· added admin command **/jellyfinsettings cooldownrefreshlib <minutes>** (Set the cooldown for user command refresh library to avoid spam)<br> 
+<a name="new-commands">New Commands:</a>
+
+```
+· added user command **/jellyfin resetpassword** (You will get a DM with a new randomly generated password if you forgot your old one)
+· added user command **/jellyfin refreshlibrary** (Initialize a manual full library scan in case of sonarr/radarr failed or whatever)
+· added admin command **/jellyfinsettings cooldownrefreshlib <minutes>** (Set the cooldown for user command refresh library to avoid spam)
+```
+  
 <br>
 <ins>Text/Language:</ins><br>
 For my personal use i translated the text of the bot account creatiion/deactivation/reactivation part, i plan to retranslate it back for non german users <br>
@@ -80,11 +86,8 @@ This command is used to remove a record from the Db. Use /membarr dbls to determ
 ```
 
 NEW Commands:
+[See new commands above the original readme](#new-commands)
 
-```
-/jellyfin resetpassword 
-This command randomly generate a new password and send it to you in a dm
-```
 # Creating Discord Bot
 1. Create the discord server that your users will get member roles or use an existing discord that you can assign roles from
 2. Log into https://discord.com/developers/applications and click 'New Application'
