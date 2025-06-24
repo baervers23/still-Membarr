@@ -6,6 +6,8 @@ from discord.ext import commands
 from discord.ui import View, button, Button
 from discord import app_commands, Interaction, ButtonStyle, Intents
 import asyncio
+import time
+import configparser
 from plexapi.myplex import MyPlexAccount
 from plexapi.server import PlexServer
 import app.bot.helper.db as db
@@ -20,6 +22,9 @@ BOT_SECTION = 'bot_envs'
 
 plex_configured = True
 jellyfin_configured = True
+
+last_refreshlib_usercmd = None
+
 
 config = configparser.ConfigParser()
 config.read(CONFIG_PATH)
@@ -69,6 +74,14 @@ try:
     JELLYFIN_API_KEY = config.get(BOT_SECTION, "jellyfin_api_key")
 except:
     jellyfin_configured = False
+
+# Get Jellyfin cooldown timer for usercommand refresh libary
+try:
+    jellyfin_cooldown_refreshlib = config.get(BOT_SECTION, "jellyfin_cooldown_refreshlib")
+except:
+    if not config.has_section(BOT_SECTION):
+        config.add_section(BOT_SECTION)
+        config.set(BOT_SECTION, "jellyfin_cooldown_refreshlib", "15")
 
 # Get Jellyfin roles config
 try:
@@ -388,6 +401,37 @@ class app(commands.Cog):
         except Exception as e:
             print(e)
             await interaction.followup.send("❌   Beim Passwort zurücksetzen ist ein Fehler aufgetreten.")
+
+    @jellyfin_commands.command(name="refreshlibrary", description="Mediathek aktualisieren, WARNUNG: Vorgang kann lagg's bei aktuell Streamenenden verursachen!")
+    async def refreshlibarybycmd(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        
+        global last_refreshlib_usercmd
+        username = db.get_jellyfin_username(interaction.user.id)
+        now = time.time()
+        jellyfin_cooldown_refreshlib = float(config.get(BOT_SECTION, "last_refreshlib_usercmd", fallback="15"))
+        cooldown_seconds = jellyfin_cooldown_refreshlib * 60
+
+        if last_refreshlib_usercmd is None:
+            last_refreshlib_usercmd = 0
+
+        try:
+            last_refreshlib_usercmd = float(last_refreshlib_usercmd)
+        except (TypeError, ValueError):
+            last_refreshlib_usercmd = 0
+
+        if now - last_refreshlib_usercmd < cooldown_seconds:
+            await interaction.followup.send("⏳ Dieser Command befindet sich noch im Cooldown. Versuch es später noch einmal.", ephemeral=True)
+            return
+
+        # no cooldown? run it
+        last_refreshlib_usercmd = str(now)
+        try:
+            jelly.refresh_libary(JELLYFIN_SERVER_URL, JELLYFIN_API_KEY)
+            await interaction.followup.send("✅ Jellyfin Bibliothek wird aktualisiert (Full Scan)", ephemeral=True)
+            print(f"Jellyfin: Aktulisiere Mediathek(Scanne: Gesamte Mediathek), getätigt durch User:{username} durch benutzen des /slash Befehls.)")
+        except Exception as e:
+            await interaction.followup.send("❌   Error, Mediathek aktualisieren aus irgend einem Grund nicht möglich.")
 
     @app_commands.checks.has_permissions(administrator=True)
     @plex_commands.command(name="invite", description="Invite a user to Plex")

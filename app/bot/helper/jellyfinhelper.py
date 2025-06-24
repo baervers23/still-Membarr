@@ -172,6 +172,35 @@ def reset_pw(jellyfin_url, jellyfin_api_key, jellyfin_username, password):
     except Exception as e:
         print(e)
         return False
+    
+def refresh_libary(jellyfin_url, jellyfin_api_key):
+    try:
+        url = f"{jellyfin_url}/Library/Refresh"
+        querystring = {"api_key":jellyfin_api_key}
+
+        response = requests.request("POST", url, params=querystring)
+        if response.status_code == 204:
+            print(f"✅  Aktualisiere Mediathek!")
+            #print(f"✅  Refreshing Library!")
+            return True
+        elif response.status_code == 401:
+            print(f"❌  Fehler beim aktualisieren der Mediathek: 401 Nicht authorisiert.")
+            #print(f"❌  Error refreshing Library: 401 Unauthorized.")
+            return False  
+        elif response.status_code == 403:
+            print(f"❌  Fehler beim aktualisieren der Mediathek: 403 Nicht erlaubt.")
+            #print(f"❌  Error refreshing Library: 403 Forbidden.")
+            return False  
+        elif response.status_code == 503:
+            print(f"❌  Fehler beim aktualisieren der Mediathek: 503 Der Server fährt gerade hoch oder ist vorübergehend nicht erreichbar.")
+            #print(f"❌  Error refreshing Library: 503 The Server is currently starting or is temporarly not available.")
+            return False  
+
+    except Exception as e:
+        print(e)
+        return False
+
+    
  
 def enable_user(jellyfin_url, jellyfin_api_key, jellyfin_username):
     try:

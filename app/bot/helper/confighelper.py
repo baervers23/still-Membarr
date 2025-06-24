@@ -5,14 +5,14 @@ from dotenv import load_dotenv
 
 CONFIG_PATH = 'app/config/config.ini'
 BOT_SECTION = 'bot_envs'
-MEMBARR_VERSION = 1.1
+MEMBARR_VERSION = 1.2
 
 config = configparser.ConfigParser()
 
 CONFIG_KEYS = ['username', 'password', 'discord_bot_token', 'plex_user', 'plex_pass', 'plex_token',
                 'plex_base_url', 'plex_roles', 'plex_server_name', 'plex_libs', 'owner_id', 'channel_id',
                 'auto_remove_user', 'jellyfin_api_key', 'jellyfin_server_url', 'jellyfin_roles',
-                'jellyfin_libs', 'plex_enabled', 'jellyfin_enabled', 'jellyfin_external_url']
+                'jellyfin_libs', 'plex_enabled', 'jellyfin_enabled', 'jellyfin_external_url', 'jellyfin_cooldown_refreshlib']
 
 # settings
 Discord_bot_token = ""
@@ -27,6 +27,7 @@ JELLYFIN_SERVER_URL = ""
 JELLYFIN_API_KEY = ""
 jellyfin_libs = ""
 jellyfin_roles = None
+jellyfin_cooldown_refreshlib = ""
 plex_configured = True
 jellyfin_configured = True
 
@@ -126,6 +127,13 @@ if jellyfin_roles:
     jellyfin_roles = list(jellyfin_roles.split(','))
 else:
     jellyfin_roles = []
+
+# Get Cooldown refresh libary by usercommand
+try:
+    jellyfin_cooldown_refreshlib = config.get(BOT_SECTION, 'jellyfin_cooldown_refreshlib')
+except:
+    print("Could not get cooldown in minutes config. Defaulting to 15min")
+    jellyfin_cooldown_refreshlib = "15"
 
 # Get Jellyfin libs config
 try:

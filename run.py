@@ -7,15 +7,18 @@ from discord.ui import Button, View, Select
 from discord import app_commands
 import asyncio
 import sys
-from app.bot.helper.confighelper import MEMBARR_VERSION, switch, Discord_bot_token, plex_roles, jellyfin_roles
+from app.bot.helper.confighelper import MEMBARR_VERSION, switch, Discord_bot_token, plex_roles, jellyfin_roles, jellyfin_cooldown_refreshlib
 import app.bot.helper.confighelper as confighelper
 import app.bot.helper.jellyfinhelper as jelly
 from app.bot.helper.message import *
 from requests import ConnectTimeout
 from plexapi.myplex import MyPlexAccount
 
+intents = discord.Intents.default()
+bot = commands.Bot(command_prefix="!", intents=intents)
 
 maxroles = 99
+last_refreshlib_usercmd = 0
 
 if switch == 0:
     print("Missing Config.")
@@ -31,7 +34,7 @@ class Bot(commands.Bot):
         super().__init__(command_prefix=".", intents=intents)
 
     async def on_ready(self):
-        print("Bot is online.")
+        print("Bot is online as {bot.user}.")
         for guild in self.guilds:
             print("Syncing commands to " + guild.name)
             self.tree.copy_global_to(guild=guild)
@@ -197,6 +200,19 @@ async def jellyrolels(interaction: discord.Interaction):
         ", ".join(jellyfin_roles), ephemeral=True
     )
 
+@jellyfin_commands.command(name="cooldownrefreshlib",
+                           description="Set a cooldown time for the user command to refresh Jellyfin libary")
+@app_commands.checks.has_permissions(administrator=True)
+async def jellysetcooldownrefreshlib(interaction: discord.Interaction, cooldown_minutes: int):
+    await interaction.response.send_message(f"Cooldown für Manuelles aktualisieren der Mediathek wurde geändert.", 
+        ephemeral=True
+    )
+    confighelper.change_config("jellyfin_cooldown_refreshlib", int(cooldown_minutes))
+    
+    print("Cooldown für Befehl 'Mediathek aktualisieren' wurde geändert. Starte Bot neu.")
+    await interaction.followup.send("Cooldown für Befehl 'Mediathek aktualisieren' wurde geändert. Starte Bot neu.", ephemeral=True)
+    await reload()
+    print("Bot wurde neu gestartet. Gedulde dich ein paar Sekunden.")
 
 @jellyfin_commands.command(name="setup", description="Setup Jellyfin integration")
 @app_commands.checks.has_permissions(administrator=True)

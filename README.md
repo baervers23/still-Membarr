@@ -1,4 +1,4 @@
-**still-Membarr**
+**still-Membarr** - 1.2
 =================
 is still a Membarr bot with small modifications it looks like Yurorio stopped work on it so i forked it<br>**the thanks definitely go to [Yurorio](https://github.com/Yoruio/Membarr)  and [faizyy01](https://github.com/faizyy01/Invitarr)**
 
@@ -33,6 +33,8 @@ Modifications & Changes:<br>
 <br>
 <ins>Commands:</ins><br>
 · added user command **/jellyfin resetpassword** (You will get a DM with a new randomly generated password if you forgot your old one)<br>
+· added user command **/jellyfin refreshlibrary** (Initialize a manual full library scan in case of sonarr/radarr failed or whatever)<br>
+· added admin command **/jellyfinsettings cooldownrefreshlib <minutes>** (Set the cooldown for user command refresh library to avoid spam)<br> 
 <br>
 <ins>Text/Language:</ins><br>
 For my personal use i translated the text of the bot account creatiion/deactivation/reactivation part, i plan to retranslate it back for non german users <br>
